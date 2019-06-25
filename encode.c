@@ -128,9 +128,29 @@ char* str_hex(struct radix* r)
     return str;
 }
 
+char* str_bin(struct radix* r)
+{
+    // since each byte will be represented by 8 chars
+    int strlen = r->len * 8;
+    char* str = malloc(sizeof(byte) * strlen + 1);
+    str[strlen] = 0;
+    int str_index = 0;
+    
+    for(int i = 0; i < r->len; i++) {
+        memcpy(str+str_index, bin_table[ BYTE_CAST(r->raw)[i] & 0x0f], 4);
+        str_index += 4;
+        memcpy(str+str_index, bin_table[ (BYTE_CAST(r->raw)[i] & 0xf0) >> 4], 4);
+        str_index += 4;
+    }
+
+    return str;
+}
+
 char* decode(struct radix* r) 
 {
     switch(r->scheme) {
+        case BIN:
+            return str_bin(r);
         case HEX:
             return str_hex(r);
         case B64:
@@ -151,9 +171,8 @@ struct radix* XOR(struct radix* r1, struct radix* r2)
     r->len = r1->len;
     r->scheme = r1->scheme;
 
-    for(int i = 0; i < r->len; i++) {
-        BYTE_CAST(r->raw)[i] = BYTE_CAST(r->raw)[i] ^ BYTE_CAST(r->raw)[i];
-    }
+    for(int i = 0; i < r->len; i++) 
+        BYTE_CAST(r->raw)[i] = BYTE_CAST(r1->raw)[i] ^ BYTE_CAST(r2->raw)[i];
 
     return r;
 }

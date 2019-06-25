@@ -4,57 +4,23 @@
 #include "encode.h"
 
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv) 
+{
+    char* s1 = "this is a test";
+    char* s2 = "wokka wokka!!!";
 
-    FILE* f = fopen("4.txt", "r");
-    if(!f) {
-        fprintf(stderr, "file could not open\n");
+    struct radix r1 = {.scheme = BIN, .raw = s1, .len = strlen(s1)}; 
+    struct radix r2 = {.scheme = BIN, .raw = s2, .len = strlen(s2)}; 
+
+    struct radix* rxor = XOR(&r1, &r2);
+    if(!rxor) 
         return 1;
-    }
 
-    char* line = NULL;
-    size_t linecap = 0;
-    ssize_t linelen;
-    char* c;
-    struct string_freq sf_arr[256 * 2];
-    int sf_index = 0;
-    struct radix* r;
-
-    while((linelen = getline(&line, &linecap, f)) > 0) {
-        // remove \n
-        if ((c = strrchr(line, '\n'))) {
-            *c = 0;
-        }
-
-        r = init(line, HEX);
-        struct string_freq sf[128];
-
-        for(int key = 0; key < 128; key++) {
-            sf[key].key = key;
-            sf[key].r = single_byte_XOR(r, key);
-        }
-
-        deinit(r);
-        memcpy(sf_arr + sf_index, best_match(sf, 128), sizeof(struct string_freq));
-        sf_index++;
-
-        if(sf_index > 256 * 2) {
-            fprintf(stderr, "sf_arr index out of bound\n");
-            break;
-        }
-    }
-     
-    // find highest freq count
-    int max = 0;
-    struct string_freq* fmax = NULL;
-    for(int i = 0; i < sf_index; i++) {
-       if(max < sf_arr[i].freq) {
-            max = sf_arr[i].freq;
-            fmax = sf_arr + i;
-       } 
-    }
-    
-    write_readble(fmax, stdout);
-    fclose(f);
+    char* strxor = decode(rxor);
+    int n = 0;
+    for(int i = 0; i < strlen(strxor); i++)
+        if(strxor[i] == '1')
+            n++;
+    printf("Hamming distance: %i\n", n);
     return 0;
-}
+} 

@@ -11,6 +11,7 @@ struct radix {
    int len; // total byte
 };
 
+static char* bin_table[] = {"0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010", "1011", "1100", "1101", "1110", "1111"};
 
 static char base64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
                               'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
@@ -39,7 +40,6 @@ static char base64_table[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 
 
 #define CEIL(n, m) ((n) % (m) != 0 ? ((n) / (m))+1 : (n) / (m))
 #define BYTE_CAST(e) ((byte*)e)
-
 
 // inits the struct, formats using big endian
 // inserts two chars in hex format into one byte 
