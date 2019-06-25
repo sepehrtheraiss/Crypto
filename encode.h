@@ -84,7 +84,10 @@ int count_freqs(char* str, int str_len);
 // Sort the array from highest freq count
 void sort_freq(struct string_freq* sf, int len);
 
+// counts freq and returns sorted array in ascending order
+struct string_freq* best_match(struct string_freq* arr, int len);
+
 // Given an array, writes n highest freq count to fd
-void write_readble(struct string_freq* arr, int len, int n, FILE* file);
+void write_readble(struct string_freq* sf, FILE* file);
 
 #endif

@@ -158,7 +158,7 @@ struct radix* XOR(struct radix* r1, struct radix* r2)
     return r;
 }
 
-struct radix* singl_byte_XOR(struct radix* r, byte key) 
+struct radix* single_byte_XOR(struct radix* r, byte key) 
 {
     struct radix* new = malloc(sizeof(struct radix));
     new->scheme = r->scheme;
@@ -177,7 +177,6 @@ byte* repeat_key_XOR(byte* msg, int mlen, byte* key, int klen)
     byte* en = malloc(sizeof(byte) * mlen);
     for(int i = 0; i < mlen; ) {
        for(int j = 0; j < klen; j++) {
-            //printf("%i %i\n", msg[i], key[j]);
             en[i] = msg[i] ^ key[j];
             i++;
        } 
@@ -207,20 +206,24 @@ int count_freqs(char* str, int str_len)
     return count;
 }
 
-void write_readble(struct string_freq* arr, int len, int n, FILE* file)
+struct string_freq* best_match(struct string_freq* arr, int len)
 {
     for(int i = 0; i < len; i++) 
         arr[i].freq = count_freqs(arr[i].r->raw, arr[i].r->len);
 
     sort_freq(arr, len);
+    return arr;
+}
+
+void write_readble(struct string_freq* sf, FILE* file)
+{
+    if(!sf)
+        return;
 
     char buff[32];
     int sn;
-    for(int i = 0; i < n; i++) {
-        sn = snprintf(buff, sizeof(buff), "key: %c freq: %i str: ", arr[i].key, arr[i].freq);
-        fwrite(buff, sizeof(buff[0]), sn, file);
-        fwrite(arr[i].r->raw, sizeof(byte), arr[i].r->len, file);
-        fwrite("\n", 1, 1, file);
-    }
+    sn = snprintf(buff, sizeof(buff), "key: %c freq: %i str: ", sf->key, sf->freq);
+    fwrite(buff, sizeof(buff[0]), sn, file);
+    fwrite(sf->r->raw, sizeof(byte), sf->r->len, file);
 } 
 
