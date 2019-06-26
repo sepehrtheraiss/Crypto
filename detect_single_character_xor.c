@@ -19,6 +19,7 @@ int main(int argc, char** argv) {
     struct string_freq sf_arr[256 * 2];
     int sf_index = 0;
     struct radix* r;
+    struct string_freq* best;
 
     while((linelen = getline(&line, &linecap, f)) > 0) {
         // remove \n
@@ -35,12 +36,19 @@ int main(int argc, char** argv) {
         }
 
         deinit(r);
-        memcpy(sf_arr + sf_index, best_match(sf, 128), sizeof(struct string_freq));
+        best = best_match(sf, 128);
+        memcpy(sf_arr + sf_index, best, sizeof(struct string_freq));
+
+        for(int key = 0; key < 128; key++) {
+            if(best->r != sf[key].r)
+                deinit(sf[key].r);
+        }
+
         sf_index++;
 
         if(sf_index > 256 * 2) {
             fprintf(stderr, "sf_arr index out of bound\n");
-            break;
+            return 1;
         }
     }
      
@@ -56,5 +64,8 @@ int main(int argc, char** argv) {
     
     write_readble(fmax, stdout);
     fclose(f);
+    for(int i = 0; i < sf_index; i++) {
+        deinit(sf_arr[i].r);
+    }
     return 0;
 }
