@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     size_t linecap = 0;
     ssize_t linelen;
     char* c;
-    struct string_freq sf_arr[256 * 2];
+    struct string_freq sf_best[256 * 2];
     int sf_index = 0;
     struct radix* r;
     struct string_freq* best;
@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
 
         deinit(r);
         best = best_match(sf, 128);
-        memcpy(sf_arr + sf_index, best, sizeof(struct string_freq));
+        memcpy(sf_best + sf_index, best, sizeof(struct string_freq));
 
         for(int key = 0; key < 128; key++) {
             if(best->r != sf[key].r)
@@ -47,25 +47,27 @@ int main(int argc, char** argv) {
         sf_index++;
 
         if(sf_index > 256 * 2) {
-            fprintf(stderr, "sf_arr index out of bound\n");
+            fprintf(stderr, "sf_best index out of bound\n");
             return 1;
         }
     }
      
     // find highest freq count
     int max = 0;
-    struct string_freq* fmax = NULL;
+    struct string_freq* pmax = NULL;
     for(int i = 0; i < sf_index; i++) {
-       if(max < sf_arr[i].freq) {
-            max = sf_arr[i].freq;
-            fmax = sf_arr + i;
+       if(max < sf_best[i].freq) {
+            max = sf_best[i].freq;
+            pmax = sf_best + i;
        } 
     }
     
-    write_readble(fmax, stdout);
+    write_readble(pmax, stdout);
     fclose(f);
+
     for(int i = 0; i < sf_index; i++) {
-        deinit(sf_arr[i].r);
+        deinit(sf_best[i].r);
     }
+    
     return 0;
 }

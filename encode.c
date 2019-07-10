@@ -35,6 +35,7 @@ void deinit(struct radix* r)
     free(r);
     r = NULL;
 }
+
 void raw_base64(struct radix* r) {
     // 24 bits (3 bytes) gives us 4 even pairs of 6 bits
     // due to system being little endian, insertion needs to be done in reverse 
@@ -98,7 +99,7 @@ void encode(struct radix* r, char scheme)
 
 char* str_base64(struct radix* r) 
 {
-    char* str = malloc(r->len * 4);
+    char* str = malloc(r->len * 4 + 1);
     int index = 0;
 
     for(int i =0; i < r->len; i++) {
@@ -109,13 +110,13 @@ char* str_base64(struct radix* r)
         index += 4;
     }
     
+    str[index] = 0;
     return str;
 }
 
 char* str_hex(struct radix* r) 
 {
     char* str = malloc((sizeof(byte) * r->len * 2) +1);
-    str[r->len*2] = 0;
     int index = 0;
 
     for(int i = 0; i < r->len; i++) {
@@ -125,6 +126,7 @@ char* str_hex(struct radix* r)
        index++;
     } 
     
+    str[index] = 0;
     return str;
 }
 
