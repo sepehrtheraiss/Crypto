@@ -64,6 +64,10 @@ struct radix* single_byte_XOR(struct radix* r, byte key);
 // XOR's each byte with key in a circular fashion
 byte* repeat_key_XOR(byte* msg, int mlen, byte* key, int klen);
 
+// finds key in file in path 
+// returns decrypted string along with key and freq count
+char* detect_single_character_xor(char* path);
+
 /* WORD FREQUENCY */
 
 #define CHR_CHECK(c) ('E' == c || 'T' == c || 'A' == c || 'O' == c || 'I' == c || 'N' == c ||\

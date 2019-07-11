@@ -241,10 +241,95 @@ void write_readble(struct string_freq* sf, FILE* file)
     if(!sf)
         return;
 
-    char buff[32];
+    char buff[64];
     int sn;
     sn = snprintf(buff, sizeof(buff), "key: %c freq: %i str: ", sf->key, sf->freq);
     fwrite(buff, sizeof(buff[0]), sn, file);
     fwrite(sf->r->raw, sizeof(byte), sf->r->len, file);
 } 
 
+char* sf_str(struct string_freq* sf)
+{
+    if(!sf)
+        return NULL;
+
+    int str_len = sf->r->len + 64;
+    char* str = malloc(str_len + 1);
+
+    int n = snprintf(str, 64, "key: %c freq: %i str: ", sf->key, sf->freq);
+    memcpy(str + n , sf->r->raw, sf->r->len);
+    str[n + sf->r->len] = 0;
+
+    return str;
+}
+
+char* detect_single_character_xor(char* path) 
+{
+
+    FILE* f = fopen(path, "r");
+    if(!f) {
+        fprintf(stderr, "file could not open\n");
+        return NULL;
+    }
+
+    char* line = NULL;
+    size_t linecap = 0;
+    ssize_t linelen;
+    char* c;
+    struct string_freq sf_best[256 * 2]; // change this to num of \n
+    int sf_index = 0;
+    struct radix* r;
+    struct string_freq* best;
+
+    while((linelen = getline(&line, &linecap, f)) > 0) {
+        // remove \n
+        if ((c = strrchr(line, '\n'))) {
+            *c = 0;
+        }
+
+        r = init(line, HEX);
+        struct string_freq sf[128];
+
+        for(int key = 0; key < 128; key++) {
+            sf[key].key = key;
+            sf[key].r = single_byte_XOR(r, key);
+        }
+
+        deinit(r);
+        best = best_match(sf, 128);
+        memcpy(sf_best + sf_index, best, sizeof(struct string_freq));
+
+        for(int key = 0; key < 128; key++) {
+            if(best->r != sf[key].r)
+                deinit(sf[key].r);
+        }
+
+        sf_index++;
+
+        if(sf_index > 256 * 2) {
+            fprintf(stderr, "sf_best index out of bound\n");
+            return NULL;
+        }
+    }
+     
+    fclose(f);
+
+    // find highest freq count
+    int max = 0;
+    struct string_freq* pmax = NULL;
+    for(int i = 0; i < sf_index; i++) {
+       if(max < sf_best[i].freq) {
+            max = sf_best[i].freq;
+            pmax = sf_best + i;
+       } 
+    }
+    
+    //write_readble(pmax, stdout);
+    char* str = sf_str(pmax);
+
+    for(int i = 0; i < sf_index; i++) {
+        deinit(sf_best[i].r);
+    }
+    
+    return str;
+}
